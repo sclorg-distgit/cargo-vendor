@@ -13,7 +13,7 @@
 %endif
 
 Name:           %{?scl_prefix}cargo-vendor
-Version:        0.1.7
+Version:        0.1.11
 Release:        1%{?dist}
 Summary:        Cargo subcommand to vendor crates.io dependencies
 License:        ASL 2.0 or MIT
@@ -60,11 +60,11 @@ local directory using Cargo's support for source replacement.
 
 %prep
 
-# vendored crates
-%setup -q -n %{pkg_name}-%{version}-vendor -T -b 100
-
 # cargo-vendor sources
 %setup -q -n %{pkg_name}-%{version}
+
+# vendored crates
+%setup -q -n %{pkg_name}-%{version} -T -D -a 100
 
 # define the offline registry
 %global cargo_home $PWD/.cargo
@@ -75,7 +75,7 @@ registry = 'https://github.com/rust-lang/crates.io-index'
 replace-with = 'vendored-sources'
 
 [source.vendored-sources]
-directory = '$PWD/../%{pkg_name}-%{version}-vendor'
+directory = '$PWD/vendor'
 EOF
 
 # This should eventually migrate to distro policy
@@ -99,10 +99,11 @@ export RUSTFLAGS="%{rustflags}"
 %{?scl:scl enable %scl - << \EOF}
 set -ex
 
-# use a dummy configure to get CFLAGS etc.
-echo '#!/bin/true' >./configure
-chmod +x ./configure
-%configure
+# cargo-vendor doesn't use a configure script, but we still want to use
+# CFLAGS in case of the odd C file in vendored dependencies.
+%{?__global_cflags:export CFLAGS="%{__global_cflags}"}
+%{!?__global_cflags:%{?optflags:export CFLAGS="%{optflags}"}}
+%{?__global_ldflags:export LDFLAGS="%{__global_ldflags}"}
 
 cargo build --release
 
@@ -123,7 +124,7 @@ rm -f %{buildroot}%{_prefix}/.crates.toml
 
 
 #check
-# no tests available
+# the tests don't work offline
 
 
 %files
@@ -133,5 +134,8 @@ rm -f %{buildroot}%{_prefix}/.crates.toml
 
 
 %changelog
+* Mon Jul 24 2017 Josh Stone <jistone@redhat.com> - 0.1.11-1
+- Update to 0.1.11
+
 * Thu Jun 15 2017 Josh Stone <jistone@redhat.com> - 0.1.7-1
 - Initial packaging.
