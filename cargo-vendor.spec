@@ -13,7 +13,7 @@
 %endif
 
 Name:           %{?scl_prefix}cargo-vendor
-Version:        0.1.11
+Version:        0.1.12
 Release:        1%{?dist}
 Summary:        Cargo subcommand to vendor crates.io dependencies
 License:        ASL 2.0 or MIT
@@ -134,8 +134,11 @@ rm -f %{buildroot}%{_prefix}/.crates.toml
 
 
 %changelog
+* Mon Sep 11 2017 Josh Stone <jistone@redhat.com> - 0.1.12-1
+- Update to 0.1.12.
+
 * Mon Jul 24 2017 Josh Stone <jistone@redhat.com> - 0.1.11-1
-- Update to 0.1.11
+- Update to 0.1.11.
 
 * Thu Jun 15 2017 Josh Stone <jistone@redhat.com> - 0.1.7-1
 - Initial packaging.
